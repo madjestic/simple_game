@@ -1,6 +1,6 @@
 module Main where
 
-import GameState.Game
+import Game
 
 main :: IO ()
 main = do
