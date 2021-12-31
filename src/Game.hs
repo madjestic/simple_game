@@ -8,34 +8,38 @@ import SDL.Time (delay)
 import GameState
 import Input
 
+inc :: GameState -> GameState
+inc (GameState c n) =
+  GameState
+  { tick      = c + n
+  , increment = n
+  }
 
-defaultState :: StateT GameState IO ()
-defaultState = do
-  return ()
-
-inc :: GameState -> Integer -> GameState
-inc (GameState c) n = GameState ( c + n )
-
--- input :: (Monad IO) => StateT GameState IO Integer
--- input = do
---   x <- getLine
---   return
+inc' :: Integer -> GameState -> GameState
+inc' k (GameState c _) =
+  GameState
+  { tick      = c + k
+  , increment = k
+  }
 
 loop :: StateT GameState IO GameState
 loop = do
   liftIO $ delay 100
   state <- get
   handleEvents
-  modify $ flip inc 1
+  --modify inc
+  modify $ inc' 1
   liftIO $ print state
   loop
 
 startState :: GameState
-startState = GameState { tick = 0 }
+startState =
+  GameState { tick = 0
+            , increment = 1 }
 
 runGame :: IO GameState
 runGame = do
   evalStateT (do
-      defaultState
+      defaultGameState
       loop)
       startState

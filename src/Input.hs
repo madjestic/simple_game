@@ -3,7 +3,7 @@ where
 
 
 import Control.Monad.State as State
-import SDL.Raw
+import SDL
 -- import Data.List hiding (maximum)
 -- import Data.Foldable
 -- import Control.Monad hiding (forM_)
@@ -13,13 +13,46 @@ import SDL.Raw
 import GameState
 
 inputMapping
-  :: [(Keycode,
+  :: [(Scancode,
        (StateT GameState IO (),
         StateT GameState IO ()))]
-inputMapping = []
+inputMapping =
+  [ (ScancodeKPPlus, (inc3 1, inc3 0))
+  ]
+
+inc3 :: Integer -> StateT GameState IO ()
+inc3 n = modify $ inc''' n
+
+inc'' :: Integer -> StateT GameState IO () -> StateT GameState IO ()
+inc'' n g = modify $ inc''' n
+
+inc''' :: Integer -> GameState -> GameState
+inc''' k (GameState c _) =
+  GameState
+  { tick      = c + k
+  , increment = k
+  }
+
+-- processEvent :: (Monad m) => [(Scancode , (m (), m ()))] -> Event -> m ()
+-- processEvent n evt =
+--   let mk = case evt of
+--              KeyDown (Keysym k _ _) -> Just (True, k)
+--              KeyUp   (Keysym k _ _) -> Just (False, k) 
+--              _                      -> Nothing
+--   in case mk of
+--        Nothing     -> return ()
+--        Just (e, k) -> case lookup k n of
+--                         Nothing       -> return ()
+--                         Just (a1, a2) -> if e then a1 else a2
+
+processEvents :: (Monad m) => [(Scancode, (m (), m ()))] -> [Event] -> m ()
+processEvents = undefined
 
 handleEvents :: StateT GameState IO ()
-handleEvents = undefined
+handleEvents = do
+  events <- SDL.pollEvents
+  processEvents inputMapping events
+  return ()
 -- handleEvents = do
 --   events <- liftIO $ pollAllSDLEvents
 --   processEvents inputMapping events
