@@ -18,7 +18,14 @@ inputMapping
         StateT GameState IO ()))]
 inputMapping =
   [ (ScancodeKPPlus, (inc3 1, inc3 0))
+  , (ScancodeQ,      (exit True, exit False))
   ]
+
+exit :: Bool -> StateT GameState IO ()
+exit b = modify $ quit' b
+
+quit' :: Bool -> GameState -> GameState
+quit' b g = g { quitMe = b}
 
 inc3 :: Integer -> StateT GameState IO ()
 inc3 n = modify $ inc''' n
@@ -27,26 +34,28 @@ inc'' :: Integer -> StateT GameState IO () -> StateT GameState IO ()
 inc'' n g = modify $ inc''' n
 
 inc''' :: Integer -> GameState -> GameState
-inc''' k (GameState c _) =
+inc''' k (GameState c _ q) =
   GameState
   { tick      = c + k
   , increment = k
+  , quitMe    = q
   }
 
--- processEvent :: (Monad m) => [(Scancode , (m (), m ()))] -> Event -> m ()
--- processEvent n evt =
---   let mk = case evt of
---              KeyDown (Keysym k _ _) -> Just (True, k)
---              KeyUp   (Keysym k _ _) -> Just (False, k) 
---              _                      -> Nothing
---   in case mk of
---        Nothing     -> return ()
---        Just (e, k) -> case lookup k n of
---                         Nothing       -> return ()
---                         Just (a1, a2) -> if e then a1 else a2
+processEvent :: (Monad m) => [(Scancode , (m (), m ()))] -> Event -> m ()
+processEvent n e =
+  let mk = case eventPayload e of
+             KeyboardEvent keyboardEvent -> Just
+               ( keyboardEventKeyMotion keyboardEvent == Pressed
+               , keysymScancode (keyboardEventKeysym keyboardEvent))
+             _                      -> Nothing
+  in case mk of
+       Nothing     -> return ()
+       Just (e, k) -> case lookup k n of
+                        Nothing       -> return ()
+                        Just (a1, a2) -> if e then a1 else a2
 
 processEvents :: (Monad m) => [(Scancode, (m (), m ()))] -> [Event] -> m ()
-processEvents = undefined
+processEvents ns = mapM_ (processEvent ns)
 
 handleEvents :: StateT GameState IO ()
 handleEvents = do

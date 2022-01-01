@@ -9,17 +9,19 @@ import GameState
 import Input
 
 inc :: GameState -> GameState
-inc (GameState c n) =
+inc (GameState c n q) =
   GameState
   { tick      = c + n
   , increment = n
+  , quitMe    = q
   }
 
 inc' :: Integer -> GameState -> GameState
-inc' k (GameState c _) =
+inc' k (GameState c _ q) =
   GameState
   { tick      = c + k
   , increment = k
+  , quitMe    = q
   }
 
 loop :: StateT GameState IO GameState

@@ -7,6 +7,7 @@ data GameState =
      {
        tick      :: Integer
      , increment :: Integer
+     , quitMe    :: Bool
      } deriving Show
 
 defaultGame :: GameState
@@ -14,7 +15,9 @@ defaultGame =
      GameState
      {
        tick      = 0 
-     , increment = 1 } 
+     , increment = 1
+     , quitMe    = False
+     } 
 
 defaultGameState :: StateT GameState IO ()
 defaultGameState = do
