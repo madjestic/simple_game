@@ -4,7 +4,7 @@ where
 
 import Control.Monad.State as State
 import SDL
--- import Data.List hiding (maximum)
+import SDL.Raw.Event-- import Data.List hiding (maximum)
 -- import Data.Foldable
 -- import Control.Monad hiding (forM_)
 -- import Control.Monad.State as State hiding (forM_)
@@ -12,33 +12,34 @@ import SDL
 
 import GameState
 
+import Debug.Trace as DT
+
 inputMapping
   :: [(Scancode,
        (StateT GameState IO (),
         StateT GameState IO ()))]
 inputMapping =
-  [ (ScancodeKPPlus, (inc3 1, inc3 0))
-  , (ScancodeQ,      (exit True, exit False))
+  [
+    --(ScancodeW, (inc 1, inc 0))
+    (ScancodeW, (inc (DT.trace ("suka") 1), inc 0))
+  , (ScancodeQ, (exit True, exit False))
   ]
 
 exit :: Bool -> StateT GameState IO ()
 exit b = modify $ quit' b
 
 quit' :: Bool -> GameState -> GameState
-quit' b g = g { quitMe = b}
+quit' b g = g { quitGame = b}
 
-inc3 :: Integer -> StateT GameState IO ()
-inc3 n = modify $ inc''' n
+inc :: Integer -> StateT GameState IO ()
+inc n = modify $ inc' n
 
-inc'' :: Integer -> StateT GameState IO () -> StateT GameState IO ()
-inc'' n g = modify $ inc''' n
-
-inc''' :: Integer -> GameState -> GameState
-inc''' k (GameState c _ q) =
+inc' :: Integer -> GameState -> GameState
+inc' k (GameState c _ q) =
   GameState
   { tick      = c + k
   , increment = k
-  , quitMe    = q
+  , quitGame    = q
   }
 
 processEvent :: (Monad m) => [(Scancode , (m (), m ()))] -> Event -> m ()
@@ -48,7 +49,7 @@ processEvent n e =
                ( keyboardEventKeyMotion keyboardEvent == Pressed
                , keysymScancode (keyboardEventKeysym keyboardEvent))
              _                      -> Nothing
-  in case mk of
+  in case (DT.trace ("ebat") $ mk) of
        Nothing     -> return ()
        Just (e, k) -> case lookup k n of
                         Nothing       -> return ()
@@ -57,11 +58,27 @@ processEvent n e =
 processEvents :: (Monad m) => [(Scancode, (m (), m ()))] -> [Event] -> m ()
 processEvents ns = mapM_ (processEvent ns)
 
-handleEvents :: StateT GameState IO ()
+isQuit :: EventPayload -> Bool
+isQuit ev =
+  case ev of
+    QuitEvent -> True
+    _         -> False
+
+-- isQuit :: [SDL.Event] -> Bool
+-- isQuit =
+--   case (hasEvent QuitEvent) of
+--     True -> True
+--     _    -> False
+  -- where isq QuitEvent = True
+  --       -- isq (KeyboardEvent keyboardEvent) = True
+  --       isq _ = False
+
+handleEvents :: StateT GameState IO Bool
 handleEvents = do
   events <- SDL.pollEvents
   processEvents inputMapping events
-  return ()
+  -- liftIO $ print "ebat"
+  return $ any isQuit $ fmap eventPayload events
 -- handleEvents = do
 --   events <- liftIO $ pollAllSDLEvents
 --   processEvents inputMapping events

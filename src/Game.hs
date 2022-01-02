@@ -3,45 +3,38 @@
 module Game where
 
 import Control.Monad.State as State
-import SDL.Time (delay)
+import SDL hiding (get)
 
 import GameState
 import Input
 
-inc :: GameState -> GameState
-inc (GameState c n q) =
-  GameState
-  { tick      = c + n
-  , increment = n
-  , quitMe    = q
-  }
-
-inc' :: Integer -> GameState -> GameState
-inc' k (GameState c _ q) =
+inc :: Integer -> GameState -> GameState
+inc k (GameState c _ q) =
   GameState
   { tick      = c + k
   , increment = k
-  , quitMe    = q
+  , quitGame  = q
   }
 
-loop :: StateT GameState IO GameState
-loop = do
+loop :: Renderer -> StateT GameState IO ()
+loop renderer = do
   liftIO $ delay 100
-  state <- get
-  handleEvents
-  --modify inc
-  modify $ inc' 1
-  liftIO $ print state
-  loop
+  quitGame <- handleEvents
+  -- game0 <- get
+  -- game1 <- get
+  -- modify $ inc (increment game1)
+  get >>= (liftIO . print)
+  -- liftIO $ print game0
+  rendererDrawColor renderer $= V4 0 0 255 255
+  clear renderer
+  present renderer
+  --unless qPressed (appLoop renderer)
+  
+  unless quitGame $ loop renderer
 
-startState :: GameState
-startState =
-  GameState { tick = 0
-            , increment = 1 }
-
-runGame :: IO GameState
-runGame = do
+runGame :: Renderer -> IO ()
+runGame r = do
   evalStateT (do
       defaultGameState
-      loop)
-      startState
+      loop r)
+      defaultGame 
