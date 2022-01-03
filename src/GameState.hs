@@ -14,11 +14,7 @@ defaultGame :: GameState
 defaultGame =
      GameState
      {
-       tick      = 0 
+       tick      = 128
      , increment = 0
      , quitGame    = False
      } 
-
-defaultGameState :: StateT GameState IO ()
-defaultGameState = do
-  return ()
