@@ -17,9 +17,9 @@ executable counter
   main-is:             Counter.hs
   -- other-modules:
   -- other-extensions:
-  build-depends:       base >=4.14 && <4.15
-                     , mtl  ^>= 2.2.2
-                     , sdl2 ^>= 2.5.3.0
+  build-depends:       base 
+                     , mtl  
+                     , sdl2 
   
   hs-source-dirs:      app
   default-language:    Haskell2010
@@ -30,13 +30,42 @@ executable simple-game
                        Game
                      , GameState
                      , Input
+                     , Rendering
+                     , Utils
+                     , LoadShaders
+                     , Descriptor
+                     , Material
+                     , Texture
+                     , Drawable
   -- other-extensions:
-  build-depends:       base >=4.14 && <4.15
-                     , mtl  ^>= 2.2.2
-                     , sdl2 ^>= 2.5.3.0
+  build-depends:       base                
+                     , mtl                 
+                     , sdl2                
+                     , uuid                
+                     , GLUtil              
+                     , massiv              
+                     , random              
+                     , linear              
+                     , OpenGL              
+                     , simple-affine-space 
+                     , vector              
+                     , locators            
+                     , ilist               
+                     , containers          
+                     , bytestring          
+                     , lens                
+                     , text                
+                     , aeson               
+                     , aeson-pretty        
+                     , sort                
+                     , store               
+                     , split
   
   hs-source-dirs:      app
                      , src
+  ghc-options:   -O2 -threaded -Wall -Werror -Wcompat -Widentities -Wno-unused-top-binds -Wno-orphans
+  -- cpp-options:   -DDEBUG  
+                       
   default-language:    Haskell2010
 
 executable stepper_sdl

@@ -16,5 +16,5 @@ defaultGame =
      {
        tick      = 128
      , increment = 0
-     , quitGame    = False
+     , quitGame  = False
      } 

@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE CPP    #-}
 
 module Game where
 
@@ -7,6 +8,13 @@ import SDL hiding (get)
 
 import GameState
 import Input
+
+debug :: Bool
+#ifdef DEBUG
+debug = True
+#else
+debug = False
+#endif
 
 inc :: Integer -> GameState -> GameState
 inc k (GameState c _ q) =
@@ -19,13 +27,13 @@ inc k (GameState c _ q) =
 loop :: Renderer -> StateT GameState IO ()
 loop renderer = do
   liftIO $ delay 100
-  quitGame <- handleEvents
-  get >>= (liftIO . print)
+  quitGame' <- handleEvents
+  when debug $ get >>= (liftIO . print)
   GameState t _ _ <- get
   rendererDrawColor renderer $= V4 (fromIntegral t) 0 255 255
   clear renderer
   present renderer
-  unless quitGame $ loop renderer
+  unless quitGame' $ loop renderer
 
 defaultGameState :: StateT GameState IO ()
 defaultGameState = do

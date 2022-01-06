@@ -3,11 +3,11 @@ where
 
 import Control.Monad.State as State
 import SDL
-import SDL.Raw.Event-- import Data.List hiding (maximum)
+
 
 import GameState
 
-import Debug.Trace as DT
+-- import Debug.Trace as DT
 
 inputMapping
   :: [(Scancode,
@@ -46,9 +46,9 @@ processEvent n e =
              _ -> Nothing
   in case mk of
        Nothing     -> return ()
-       Just (e, k) -> case lookup k n of
+       Just (e', k) -> case lookup k n of
                         Nothing       -> return ()
-                        Just (a1, a2) -> if e then a1 else a2
+                        Just (a1, a2) -> if e' then a1 else a2
 
 processEvents :: (Monad m) => [(Scancode, (m (), m ()))] -> [Event] -> m ()
 processEvents ns = mapM_ (processEvent ns)
